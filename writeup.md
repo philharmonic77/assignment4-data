@@ -1,5 +1,4 @@
 # 2. Filtering Common Crawl
-## 2.1 Looking at the data
 ### Problem (look_at_cc): 4 points
 (a) The URL of the first web page is http://0371rykj.com/ipfhsb/34.html. The domain does not appear to be reliably accessible anymore and is likely inactive or unstable. Based on the raw HTML, the page appears to be a Chinese industrial company website advertising environmental testing equipment. The company name is 上海林頻儀器股份有限公司.
 
@@ -237,3 +236,8 @@ Suggestions:
 
 发送短信
 ```
+
+### Problem (quality_classifier): 15 points
+TODO
+
+# 3 Deduplication
