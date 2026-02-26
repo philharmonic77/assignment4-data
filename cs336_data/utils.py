@@ -5,7 +5,7 @@ from pathlib import Path
 import random
 import fasttext
 from nltk.tokenize import word_tokenize
-import nltk
+
 
 def extract_text(bytes):
     html = decode_text(bytes)
