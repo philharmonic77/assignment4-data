@@ -47,6 +47,31 @@ def mask_pii(text):
     text, _ = mask_phone_numbers(text)
     text, _ = mask_ips(text)
     return text
+
+def classify_nsfw(text):
+    model_path = str(Path("models") / "jigsaw_fasttext_bigrams_nsfw_final.bin")
+    model = fasttext.load_model(model_path)
+    text = text.replace("\n", " ")
+    label, score = model.predict(text)
+
+    if len(label) > 0:
+        return label[0].replace('__label__', ''), score[0]
+    return "unk", 0
+
+def classify_toxic_speech(text):
+    model_path = str(Path("models") / "jigsaw_fasttext_bigrams_hatespeech_final.bin")
+    model = fasttext.load_model(model_path)
+    text = text.replace("\n", " ")
+    label, score = model.predict(text)
+
+    if len(label) > 0:
+        return label[0].replace('__label__', ''), score[0]
+    return "unk", 0
+
+def classify_harmful_content(text):
+    label1, score1 = classify_nsfw(text)
+    label2, score2 = classify_toxic_speech(text)
+    return dict(nsfw_label=label1, nsfw_score=score1, toxic_label=label2, toxic_score=score2)
     
 
 
@@ -62,15 +87,19 @@ if __name__ == "__main__":
     text = extract_text(html)
 
     # lang, prob = language_identification(text)
-
     # print(f"lang: {lang}, score: {prob:.6f}")
     # print("="*60, text_id, "="*60)
     # print(text[:5000])
 
-    clean_text = mask_pii(text)
+    # clean_text = mask_pii(text)
+    # print("="*60, text_id, "="*60)
+    # print("="*60, "RAW", "="*60)
+    # print(text)
+    # print("="*60, "MASKED", "="*60)
+    # print(clean_text)
+
+    result = classify_harmful_content(text)
+    print(f"{result["nsfw_label"]}: {result["nsfw_score"]:.4f}<br>{result["toxic_label"]}: {result["toxic_score"]:.4f}")
     print("="*60, text_id, "="*60)
-    print("="*60, "RAW", "="*60)
-    print(text)
-    print("="*60, "MASKED", "="*60)
-    print(clean_text)
+    print(text[:5000])
 

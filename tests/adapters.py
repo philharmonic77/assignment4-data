@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any
 from cs336_data.utils import extract_text, language_identification, mask_emails, mask_phone_numbers, \
-    mask_ips
+    mask_ips, classify_nsfw, classify_toxic_speech
 
 
 
@@ -28,12 +28,11 @@ def run_mask_ips(text: str) -> tuple[str, int]:
 
 
 def run_classify_nsfw(text: str) -> tuple[Any, float]:
-    raise NotImplementedError
+    return classify_nsfw(text)
 
 
 def run_classify_toxic_speech(text: str) -> tuple[Any, float]:
-    raise NotImplementedError
-
+    return classify_toxic_speech(text)
 
 def run_classify_quality(text: str) -> tuple[Any, float]:
     raise NotImplementedError

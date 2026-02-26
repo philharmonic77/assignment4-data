@@ -96,53 +96,100 @@ Suggestions:
     • Enforce safety at the post-training or policy layer, not by distorting the pretraining distribution.
 5. Across 20 random examples, most genuine phone numbers and email addresses were correctly masked. However, we observed false positives such as Chinese ICP registration numbers (e.g., “滬ICP備12004844號-2”) being incorrectly replaced as phone numbers. We also saw false negatives, where certain phone formats (e.g., “77 462 11 08-09”) were not masked despite clearly being contact numbers. These errors suggest that the masking rules may be overly pattern-based, leading to both over-matching numeric identifiers and missing less common phone number formats.
 
-#### PII Masking Examples
+    #### PII Masking Examples
 
----
+    ---
 
-**1. False Positive**
+    **1. False Positive**
 
-**Doc ID:** `<urn:uuid:064b6b41-549d-4616-8d57-e842d55dae7b>`
+    **Doc ID:** `<urn:uuid:064b6b41-549d-4616-8d57-e842d55dae7b>`
 
-- **Raw:**  
-  備案號：滬ICP備12004844號-2  
+    - **Raw:**  
+      備案號：滬ICP備12004844號-2  
 
-- **Masked:**  
-  備案號：滬ICP備|||PHONE_NUMBER|||號-2  
+    - **Masked:**  
+      備案號：滬ICP備|||PHONE_NUMBER|||號-2  
 
-- **Issue:**  
-  ICP registration number incorrectly classified as a phone number.
+    - **Issue:**  
+      ICP registration number incorrectly classified as a phone number.
 
----
+    ---
 
-**2. Correct Masking**
+    **2. Correct Masking**
 
-**Doc ID:** `<urn:uuid:1edf5909-6443-4c53-918f-f67e41c05995>`
+    **Doc ID:** `<urn:uuid:1edf5909-6443-4c53-918f-f67e41c05995>`
 
-- **Raw (excerpt):**  
-  Phone 217.641.4325  
-  Text Admissions Now! 217.393.8400  
-  Phone: 217.224.6500  
-  Telecommunications Device for the Deaf: 217.641.4309  
+    - **Raw (excerpt):**  
+      Phone 217.641.4325  
+      Text Admissions Now! 217.393.8400  
+      Phone: 217.224.6500  
+      Telecommunications Device for the Deaf: 217.641.4309  
 
-- **Issue:**  
-  Dot-separated U.S. phone numbers correctly detected and masked.
+    - **Issue:**  
+      Dot-separated U.S. phone numbers correctly detected and masked.
 
----
+    ---
 
-**3. Mixed (False Negative + Correct)**
+    **3. Mixed (False Negative + Correct)**
 
-**Doc ID:** `<urn:uuid:bf01b77e-7707-4920-ba6f-7334eb6e2a96>`
+    **Doc ID:** `<urn:uuid:bf01b77e-7707-4920-ba6f-7334eb6e2a96>`
 
-- **Raw:**  
-  email: info@centrumbrowar.pl  
-  Tel. 77 462 11 08-09  
-  Recepcja: +48 785 544 554  
+    - **Raw:**  
+      email: info@centrumbrowar.pl  
+      Tel. 77 462 11 08-09  
+      Recepcja: +48 785 544 554  
 
-- **Masked:**  
-  email: |||EMAIL_ADDRESS|||  
-  Tel. 77 462 11 08-09  
-  Recepcja: |||PHONE_NUMBER|||  
+    - **Masked:**  
+      email: |||EMAIL_ADDRESS|||  
+      Tel. 77 462 11 08-09  
+      Recepcja: |||PHONE_NUMBER|||  
 
-- **Issue:**  
-  Email and international phone correctly masked, but spaced phone number format was missed (false negative).
+    - **Issue:**  
+      Email and international phone correctly masked, but spaced phone number format was missed (false negative).
+
+### Problem (harmful_content): 6 points
+1. [classify_nsfw function](cs336_data/utils.py) 
+
+2. [classify_toxic_speech function](cs336_data/utils.py)
+
+3. 
+    Issues:
+
+    - Capability degradation: Over-filtering weakens the model’s ability to understand and handle harmful or emotionally charged content, leading to unstable behavior at inference time.
+
+    - Distribution distortion: Removing such content shifts the training distribution and disrupts conversational structure, causing the model to learn unnatural language patterns.
+
+    Suggestions:
+
+    - Instead of fully deleting harmful content, retain it with labels or metadata. Enforce safety during post-training (e.g., SFT/RLHF or policy layers) rather than distorting the pretraining distribution. 
+    - Train separate moderation models alongside the main model.
+
+4. 20% of the sampled documents are harmful. 
+
+    The classifier shows very low false positive rates, but fails to detect pornography and gambling content across multiple languages, often assigning extremely high confidence to harmful pages. This indicates poor cross-lingual robustness and severe false negative risk.
+
+    As a general filtering heuristic, a conservative threshold such as non-nsfw > 0.9. 
+
+
+  | # | Doc ID | Predicted Result | Is Harmful  | 
+  |---|--------|----------------|-------------------|
+  | 1  |   <urn:uuid:9d31ffd3-f7ec-46ca-9e08-fb1dc55de760>     |         non-nsfw: 0.9999<br>non-toxic: 0.9919         |      N        |
+  | 2  |    <urn:uuid:29a5b33e-98c8-4719-914b-3990ba3065ff>    |        non-nsfw: 1.0000<br>non-toxic: 1.0000          |      N        |
+  | 3  |   <urn:uuid:54260092-ff59-4248-8fd5-e5b910a79a3c>     |        non-nsfw: 0.9884<br>non-toxic: 0.9914          |              |
+  | 4  |    <urn:uuid:6f2d659d-6775-400e-a922-01db21e8b6b6>    |         non-nsfw: 1.0000<br>non-toxic: 1.0000         |       N       |
+  | 5  |    <urn:uuid:36f430f6-671b-4a72-ab94-35707d88cca4>    |        non-nsfw: 0.9677<br>non-toxic: 0.7362          |       Y(Gambling)-nl      |
+  | 6  |    <urn:uuid:27cb4b08-ca10-423a-86aa-c2d75f0ff824>    |        non-nsfw: 0.6925<br>non-toxic: 0.5576          |     N(BitTorrent metadata file)         |
+  | 7  |    <urn:uuid:d3b58704-d7d5-4f3f-b984-a855efaba93b>    |         non-nsfw: 0.9989<br>non-toxic: 0.9966         |       N       |
+  | 8  |    <urn:uuid:679b465c-3c47-449d-884d-af8f224d548a>    |        non-nsfw: 1.0000<br>non-toxic: 1.0000          |       N       |
+  | 9  |    <urn:uuid:9ddb3299-0388-429a-8fd3-6281670cfdd4>    |         non-nsfw: 0.9927<br>non-toxic: 0.9901         |      Y(Porn)-zh        |
+  | 10 |    <urn:uuid:010c26c3-5cc9-4dc5-b098-476b96426b1e>    |        non-nsfw: 0.9996<br>non-toxic: 0.9995          |       N       |
+  | 11 |    <urn:uuid:c380feb7-13ba-44fd-ada8-23a07f5e4f29>    |        non-nsfw: 0.9999<br>non-toxic: 0.9993          |        N      |
+  | 12 |    <urn:uuid:a4b2e894-8a6c-4bde-a647-1d4126a5385f>    |         non-nsfw: 0.9734<br>non-toxic: 0.9729         |       N       |
+  | 13 |    <urn:uuid:bd5ce134-dbed-4b98-b2de-b3742ef898df>    |         non-nsfw: 0.9999<br>non-toxic: 0.9999         |       N       |
+  | 14 |   <urn:uuid:c5b1b43e-38b0-4fd1-913d-2af5f2f2519a>     |        non-nsfw: 1.0000<br>non-toxic: 1.0000          |       N       |
+  | 15 |    <urn:uuid:6c8d71c4-4873-4c7e-b1cc-2ef034ccfb6e>    |         non-nsfw: 1.0000<br>non-toxic: 0.9889         |       Y(Porn)-fr       |
+  | 16 |    <urn:uuid:3d907a97-24bf-49e9-976d-659ba3a5b58f>    |         non-nsfw: 0.9482<br>non-toxic: 0.9501         |       N       |
+  | 17 |    <urn:uuid:2a4814f8-ee7a-4038-8559-b61a4b846575>    |       non-nsfw: 0.9996<br>non-toxic: 0.9997           |      Y(Gambling)-vi/en        |
+  | 18 |    <urn:uuid:2ab12715-6eab-43d5-a7a9-1f45bbcf7297>    |        non-nsfw: 0.9894<br>non-toxic: 0.9409          |       N       |
+  | 19 |    <urn:uuid:d52bbc9f-e57a-456c-8123-d4d8460d2f3e>    |         non-nsfw: 1.0000<br>non-toxic: 0.9994         |       N       |
+  | 20 |    <urn:uuid:5f437067-6adb-4641-912f-5a14fc6b3a9f>    |         non-nsfw: 1.0000<br>non-toxic: 1.0000         |      N        |
