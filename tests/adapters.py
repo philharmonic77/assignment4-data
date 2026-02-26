@@ -4,6 +4,7 @@ import os
 from typing import Any
 from cs336_data.utils import extract_text, language_identification, mask_emails, mask_phone_numbers, \
     mask_ips, classify_nsfw, classify_toxic_speech, gopher_quality_filters
+from cs336_data.dedup import exact_deduplication
 
 
 
@@ -45,7 +46,7 @@ def run_gopher_quality_filter(text: str) -> bool:
 def run_exact_line_deduplication(
     input_files: list[os.PathLike], output_directory: os.PathLike
 ):
-    raise NotImplementedError
+    return exact_deduplication(input_files, output_directory)
 
 
 def run_minhash_deduplication(

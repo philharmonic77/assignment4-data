@@ -241,3 +241,5 @@ Suggestions:
 TODO
 
 # 3 Deduplication
+### Problem (exact_deduplication): 3 points
+[exact_deduplication function](cs336_data/dedup.py) 
