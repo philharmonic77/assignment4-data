@@ -30,6 +30,26 @@ def language_identification(text):
         return lang[0].replace('__label__', ''), prob[0]
     return "unk", 0
 
+def mask_emails(text):
+    pattern = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+    return re.subn(pattern, "|||EMAIL_ADDRESS|||", text)
+
+def mask_phone_numbers(text):
+    pattern = re.compile(r"(?:\+?\d{1,3}[\s\-]?)?(?:\(\d{2,4}\)|\d{2,4})[\s\-]?\d{3,4}[\s\-]?\d{3,4}")
+    return re.subn(pattern, "|||PHONE_NUMBER|||", text)
+
+def mask_ips(text):
+    pattern = re.compile(r"(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)")
+    return re.subn(pattern, "|||IP_ADDRESS|||", text)   
+
+def mask_pii(text):
+    text, _ = mask_emails(text)
+    text, _ = mask_phone_numbers(text)
+    text, _ = mask_ips(text)
+    return text
+    
+
+
 if __name__ == "__main__":
     import sys
     sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -41,8 +61,16 @@ if __name__ == "__main__":
     html, text_id = sample_warc(WARC_PATH, k)
     text = extract_text(html)
 
-    lang, prob = language_identification(text)
+    # lang, prob = language_identification(text)
 
-    print(f"lang: {lang}, score: {prob:.6f}")
-    print("="*72, text_id, "="*72)
-    print(text[:5000])
+    # print(f"lang: {lang}, score: {prob:.6f}")
+    # print("="*60, text_id, "="*60)
+    # print(text[:5000])
+
+    clean_text = mask_pii(text)
+    print("="*60, text_id, "="*60)
+    print("="*60, "RAW", "="*60)
+    print(text)
+    print("="*60, "MASKED", "="*60)
+    print(clean_text)
+
