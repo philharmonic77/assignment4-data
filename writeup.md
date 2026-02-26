@@ -74,3 +74,75 @@ Suggestions:
 | 19     |      <urn:uuid:7250b9f5-c363-4721-93b0-b2ce4de0b897>       |          en         |       en        |         0.905333         |
 | 20     |     <urn:uuid:cb7e16db-8b6f-4fa2-8b6f-97e94c8d7ed4>        |          en         |       en        |         0.781990         |
 
+### Problem (mask_pii): 3 points
+1. [mask_emails function](cs336_data/utils.py) 
+
+2. [mask_phone_numbers function](cs336_data/utils.py)
+
+3. [mask_ips function](cs336_data/utils.py)
+
+4. Issues: 
+
+    • **Distribution shift**: Removing or masking IPs, emails, and phone numbers changes the training distribution, so the model may struggle with real-world formatted strings at inference time.
+
+    • **Semantic corruption**: Naïve deletion can break sentence structure and distort context.
+
+    • **Reduced capability in legitimate use cases**: Over-filtering weakens the model’s ability to handle valid tasks like documentation, examples, and technical explanations.
+
+    Suggestions:
+
+    • Replace sensitive data with synthetic but valid formats to preserve structural patterns.
+
+    • Enforce safety at the post-training or policy layer, not by distorting the pretraining distribution.
+5. Across 20 random examples, most genuine phone numbers and email addresses were correctly masked. However, we observed false positives such as Chinese ICP registration numbers (e.g., “滬ICP備12004844號-2”) being incorrectly replaced as phone numbers. We also saw false negatives, where certain phone formats (e.g., “77 462 11 08-09”) were not masked despite clearly being contact numbers. These errors suggest that the masking rules may be overly pattern-based, leading to both over-matching numeric identifiers and missing less common phone number formats.
+
+#### PII Masking Examples
+
+---
+
+**1. False Positive**
+
+**Doc ID:** `<urn:uuid:064b6b41-549d-4616-8d57-e842d55dae7b>`
+
+- **Raw:**  
+  備案號：滬ICP備12004844號-2  
+
+- **Masked:**  
+  備案號：滬ICP備|||PHONE_NUMBER|||號-2  
+
+- **Issue:**  
+  ICP registration number incorrectly classified as a phone number.
+
+---
+
+**2. Correct Masking**
+
+**Doc ID:** `<urn:uuid:1edf5909-6443-4c53-918f-f67e41c05995>`
+
+- **Raw (excerpt):**  
+  Phone 217.641.4325  
+  Text Admissions Now! 217.393.8400  
+  Phone: 217.224.6500  
+  Telecommunications Device for the Deaf: 217.641.4309  
+
+- **Issue:**  
+  Dot-separated U.S. phone numbers correctly detected and masked.
+
+---
+
+**3. Mixed (False Negative + Correct)**
+
+**Doc ID:** `<urn:uuid:bf01b77e-7707-4920-ba6f-7334eb6e2a96>`
+
+- **Raw:**  
+  email: info@centrumbrowar.pl  
+  Tel. 77 462 11 08-09  
+  Recepcja: +48 785 544 554  
+
+- **Masked:**  
+  email: |||EMAIL_ADDRESS|||  
+  Tel. 77 462 11 08-09  
+  Recepcja: |||PHONE_NUMBER|||  
+
+- **Issue:**  
+  Email and international phone correctly masked, but spaced phone number format was missed (false negative).
