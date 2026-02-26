@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 import random
 import fasttext
+from nltk.tokenize import word_tokenize
+import nltk
 
 def extract_text(bytes):
     html = decode_text(bytes)
@@ -72,7 +74,27 @@ def classify_harmful_content(text):
     label1, score1 = classify_nsfw(text)
     label2, score2 = classify_toxic_speech(text)
     return dict(nsfw_label=label1, nsfw_score=score1, toxic_label=label2, toxic_score=score2)
-    
+
+def gopher_quality_filters(text):
+    words = word_tokenize(text)
+    word_count = len(words)
+    if word_count < 50 or word_count > 100000:
+        return False
+
+    mean_word_len = sum(len(w) for w in words) / word_count
+    if mean_word_len < 3 or mean_word_len > 10:
+        return False
+
+    lines = text.splitlines()
+    ellipsis_lines = sum(1 for line in lines if line.rstrip().endswith("..."))
+    if ellipsis_lines / max(1, len(lines)) > 0.30:
+        return False
+
+    alpha_words = sum(1 for w in words if any(c.isalpha() for c in w))
+    if alpha_words / word_count < 0.80:
+        return False
+
+    return True
 
 
 if __name__ == "__main__":
@@ -98,8 +120,11 @@ if __name__ == "__main__":
     # print("="*60, "MASKED", "="*60)
     # print(clean_text)
 
-    result = classify_harmful_content(text)
-    print(f"{result["nsfw_label"]}: {result["nsfw_score"]:.4f}<br>{result["toxic_label"]}: {result["toxic_score"]:.4f}")
+    # result = classify_harmful_content(text)
+    # print(f"{result["nsfw_label"]}: {result["nsfw_score"]:.4f}<br>{result["toxic_label"]}: {result["toxic_score"]:.4f}")
+    # print("="*60, text_id, "="*60)
+    # print(text[:5000])
+
+    print(gopher_quality_filters(text))
     print("="*60, text_id, "="*60)
     print(text[:5000])
-

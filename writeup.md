@@ -193,3 +193,47 @@ Suggestions:
   | 18 |    <urn:uuid:2ab12715-6eab-43d5-a7a9-1f45bbcf7297>    |        non-nsfw: 0.9894<br>non-toxic: 0.9409          |       N       |
   | 19 |    <urn:uuid:d52bbc9f-e57a-456c-8123-d4d8460d2f3e>    |         non-nsfw: 1.0000<br>non-toxic: 0.9994         |       N       |
   | 20 |    <urn:uuid:5f437067-6adb-4641-912f-5a14fc6b3a9f>    |         non-nsfw: 1.0000<br>non-toxic: 1.0000         |      N        |
+
+### Problem (gopher_quality_filters): 3 points
+(a) [gopher_quality_filters function](cs336_data/utils.py) 
+
+(b) Overall, this method is simple but effective.
+  | # | Doc ID | Pass Gopher | My Judgement(High/Medium/Low)  | 
+  |----|--------|-------------|------------------------------------|
+  | 1  |    <urn:uuid:084db286-b641-4e41-a004-c6539985569f>    |       True      |                 Medium                   |
+  | 2  |    <urn:uuid:f8c0330d-6e4f-467b-836a-676ae1eea4b9>    |      True       |                  Medium -> High                  |
+  | 3  |    <urn:uuid:d7bdc9ce-d41f-4960-b4cc-6bb0574433f7>    |       True      |                 High                   |
+  | 4  |    <urn:uuid:f2b6a5cc-b561-49a3-bfd2-6430b0a34bdf>    |      False       |                  Low                  |
+  | 5  |    <urn:uuid:c5b1b43e-38b0-4fd1-913d-2af5f2f2519a>    |      False       |                 Low                   |
+  | 6  |   <urn:uuid:dc5aabbb-c532-4f90-830d-c3b0a3fb471a>    |     False        |                Low                    |
+  | 7  |    <urn:uuid:99587b7b-7d4b-4bee-9251-488cf7d79538>    |      True       |                High                    |
+  | 8  |    <urn:uuid:d4b23acc-2eaf-49d2-bd48-12be866420df>    |      False       |               Medium                    |
+  | 9  |   <urn:uuid:a8d76b89-1c16-49ab-ab0d-7304a9d058c8>     |       False      |               Medium                     |
+  | 10 |    <urn:uuid:8afda000-e7ba-47da-a57e-c7029a5eafd2>    |      False       |               Low                     |
+
+
+**Rank 9** The page was likely filtered due to heuristics that do not generalize well to Chinese text. In particular, the alpha-word ratio and mean word length rules assume English-style tokenization, which can mis-handle Chinese characters, numbers, and metadata (e.g., dates, registration numbers). As a result, valid and coherent Chinese content may be incorrectly removed by the quality filter.
+```
+读：1635 时间：2020-02-20 15:07
+
+　　其实说白了，认养树苗活动目的就是为了培养孩子们的爱心以及责任承担，鄂尔多斯市绿友园林有限公司通过开展苗木捐植认养、踏青赏花、公益徒步、彩色跑、音乐节、骑行登山等一系列公益活动，为青少年开展植绿护绿、低碳环保、休闲娱乐、国防教育、素质拓展教育发挥了积极作用。
+
+　　认养树苗活动的开展，贯彻了习近平总书记“前人种树后人乘凉，一代接着一代干”的植树理念，让广大青少年亲近自然、了解自然、保护自然，培养热爱自然、珍爱生命的生态意识，学习体验绿色发展理念。
+
+　　认养树苗活动中，志愿者们在树苗上挂上“认养牌”，成为园区里的一组护绿使者，今后他们将经常来为这些树木浇水、培土、施肥等，见证这些小树的茁壮成长，成为绿水青山护卫者。他们还在认养牌上留下个人信息和对认养小树的美好寄语，并在树苗前留下了幸福的合影。
+
+　　公益爱心认养、感受田园气息，体会郊游乐趣，享受劳动果实，是此次认养树苗活动和爱心认养的最大亮点。
+
+  • 【上一篇】：如何做树木的认养牌
+  • 【下一篇】：农场动物认养已慢慢走进人们的视野
+
+版权所有：鄂尔多斯市绿友园林有限公司|农场动物认养APP平台,如何认养树木,那个平台好,平台有哪些,多少钱 蒙ICP备19000570号
+
+蒙公网安备15062302000118号
+
+版权所有 鄂尔多斯市绿友园林有限公司 Copyright © 2019 All Rights Reserved. 备案号：蒙ICP备19000570号
+
+首页
+
+发送短信
+```

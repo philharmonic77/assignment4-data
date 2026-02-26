@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any
 from cs336_data.utils import extract_text, language_identification, mask_emails, mask_phone_numbers, \
-    mask_ips, classify_nsfw, classify_toxic_speech
+    mask_ips, classify_nsfw, classify_toxic_speech, gopher_quality_filters
 
 
 
@@ -39,7 +39,7 @@ def run_classify_quality(text: str) -> tuple[Any, float]:
 
 
 def run_gopher_quality_filter(text: str) -> bool:
-    raise NotImplementedError
+    return gopher_quality_filters(text)
 
 
 def run_exact_line_deduplication(
