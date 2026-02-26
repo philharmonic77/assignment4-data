@@ -30,4 +30,47 @@
 ### Problem (extract_text): 3 points
 (a) [extract_text function](cs336_data/utils.py) 
 
-(b) The WET extraction produces clean plain text but still contains navigation, boilerplate, and SEO spam. My own extraction is very similar and does not significantly reduce this noise. Overall, the WET version is slightly cleaner, but neither method isolates the true main content well.
+(b) Each time you run this [script](scripts/sample_warc.py), it returns a randomly selected HTML extraction and the matching WET output.
+
+The WET extraction presents the text in a flattened format, whereas my extraction retains more explicit structural cues such as bullet points and grouped list items. Both outputs include substantial navigation and boilerplate content, but they differ in how much of the original layout structure is preserved. The choice of which is better may depend on whether structural cues are useful for downstream tasks.
+
+### Problem (language_identification): 6 points
+(a) [language_identification function](cs336_data/utils.py) 
+
+(b)	
+Issues: 
+
+• **Skewed language distribution**: Misclassification can remove valid target-language data or include unintended languages, leading to imbalanced training and weaker performance in some languages.  
+
+• **Unstable language generation**: Incorrect handling of multilingual or mixed-language texts may cause the model to produce unintended language switching at inference time.  
+
+Suggestions: 
+
+• **Set confidence thresholds**: Keep only documents with high language identification confidence, and discard or separately process low-confidence cases to reduce misclassification noise. 
+
+• **Handle multilingual text explicitly**: Detect code-mixed documents and either filter them out or segment them by language, rather than assigning a single language label to the entire document.
+
+(c) The model makes very few misclassifications overall. It tends to assign very high confidence scores to languages with distinctive scripts (e.g., Chinese), while being more conservative for English. For English pages in particular, the score appears to reflect not only language confidence but also text quality and the proportion of natural language versus structured content. About 30% pages are English and 0.7~0.8 maybe a suitable threshold.
+| # | Doc ID | Predicted Lang | Ground Truth Lang | Confidence |
+|---|--------|----------------|-------------------|------------|
+| 1  |  <urn:uuid:20f3e975-3a5f-4454-878c-85aea2ebfd15>      |        ru        |        ru           |     0.997225       |
+| 2     |      <urn:uuid:b6aa6402-b0c4-4d5c-ba3e-dfb4e0990f51>       |         fa          |        fa       |         0.977947         |
+| 3     |      <urn:uuid:6330ea9c-5fd4-4dd0-951a-188c63f957f0>       |         zh          |       zh        |         0.973343         |
+| 4     |     <urn:uuid:12ab2283-8320-48b3-9438-a3018518b783>        |          zh         |        zh       |         0.964177         |
+| 5     |      <urn:uuid:c909bed2-77b8-4355-95d2-0f6883c53bf6>       |          ru         |       mojibake        |         0.654550         |
+| 6     |     <urn:uuid:1baf6715-357f-4346-9187-bdcc137aebf7>        |          en         |       en 　(A highly structured race results page with a very low proportion of natural language (mostly tables, numbers, and proper nouns).)       |        0.352164          |
+| 7     |      <urn:uuid:def4df6d-44f4-413c-8d9a-f8d440b80477>       |          zh         |       zh        |        0.974315          |
+| 8     |      <urn:uuid:b51b99fe-71e8-4602-b593-85b6a3d24373>       |         en          |       en        |         0.848402         |
+| 9     |      <urn:uuid:06003822-b6ea-41ca-8ef7-07700d8625bf>       |         zh          |       zh        |         0.989665         |
+| 10     |      <urn:uuid:90443fcf-1eb1-4c72-adac-8b572f835922>       |          zh         |        zh       |        0.993828          |
+| 11     |      <urn:uuid:ddbaca76-fb41-4455-a447-bf2ab495c771>       |         en          |        en       |          0.892426        |
+| 12     |     <urn:uuid:2263b548-56a5-4f01-9c58-2fab480c9de7>        |          en         |        en       |         0.804847         |
+| 13     |      <urn:uuid:0151d7cc-2f5e-4d67-8918-6a8ab6a3bbd9>       |          zh         |        zh       |         0.904083         |
+| 14     |      <urn:uuid:d1b414e4-9150-413b-ad4b-fe1f768842f7>       |         en          |       en(highly structured product category listing composed almost entirely of repeated noun phrases and item names)        |          0.546516        |
+| 15     |      <urn:uuid:643744e5-e83a-4845-bd5c-01997a0a340f>       |          ja         |        ja       |        0.998939          |
+| 16     |      <urn:uuid:4ff4b33e-135a-499a-9413-8dc2c4907453>       |         de          |        de       |         0.990754         |
+| 17     |      <urn:uuid:f68534e9-c234-4843-9769-e65781eae4aa>       |         en          |        en(an automatically generated directory listing page from a Debian package repository)      |         0.320610         |
+| 18     |      <urn:uuid:e0cea0ce-dcd6-4abe-930b-606cb9c1cef2>       |         zh         |       zh        |         0.995995         |
+| 19     |      <urn:uuid:7250b9f5-c363-4721-93b0-b2ce4de0b897>       |          en         |       en        |         0.905333         |
+| 20     |     <urn:uuid:cb7e16db-8b6f-4fa2-8b6f-97e94c8d7ed4>        |          en         |       en        |         0.781990         |
+
