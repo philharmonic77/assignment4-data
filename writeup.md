@@ -243,3 +243,10 @@ TODO
 # 3 Deduplication
 ### Problem (exact_deduplication): 3 points
 [exact_deduplication function](cs336_data/dedup.py) 
+
+### Problem (minhash_deduplication): 8 points
+[minhash_deduplication function](cs336_data/dedup.py) 
+
+
+# 4 Leaderboard: filter data for language modeling
+TODO: LACK OF DATA

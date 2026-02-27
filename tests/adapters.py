@@ -4,7 +4,7 @@ import os
 from typing import Any
 from cs336_data.utils import extract_text, language_identification, mask_emails, mask_phone_numbers, \
     mask_ips, classify_nsfw, classify_toxic_speech, gopher_quality_filters
-from cs336_data.dedup import exact_deduplication
+from cs336_data.dedup import exact_deduplication, minhash_deduplication
 
 
 
@@ -57,4 +57,4 @@ def run_minhash_deduplication(
     jaccard_threshold: float,
     output_directory: os.PathLike,
 ):
-    raise NotImplementedError
+    return minhash_deduplication(input_files, num_hashes, num_bands, ngrams,  jaccard_threshold, output_directory)
